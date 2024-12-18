@@ -56,6 +56,8 @@ type browserVersion struct {
 	WebSocketDebuggerUrl string `json:"webSocketDebuggerUrl"`
 }
 
+const maxWaitSeconds int = 30
+
 func getFreePort() (int, error) {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -94,8 +96,8 @@ func newChromeWithArgs(chromeBinary string, args ...string) (*chrome, error) {
 		if err == nil {
 			break
 		}
-		if time.Since(startTime) > 5*time.Second {
-			return nil, fmt.Errorf("failed to reach /json/version within 5 seconds: %w", err)
+		if time.Since(startTime) > time.Duration(maxWaitSeconds)*time.Second {
+			return nil, fmt.Errorf("failed to reach /json/version within %d seconds: %w", maxWaitSeconds, err)
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
